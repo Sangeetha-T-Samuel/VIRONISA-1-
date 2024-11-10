@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Income vs Expense Chart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        #incomeExpenseChart {
+            width: 100%;
+            height: 400px;
+        }
+    </style>
+    <!-- Firebase v8 SDK (non-modular) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <h1>Income vs Expense Chart</h1>
+    <canvas id="incomeExpenseChart"></canvas>
+</div>
+
+<script>
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyC6OguzJC5Zr5iuN_Ii0MckURFTuobahTo",
+        authDomain: "vironisa-4beb8.firebaseapp.com",
+        databaseURL: "https://vironisa-4beb8-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "vironisa-4beb8",
+        storageBucket: "vironisa-4beb8.firebasestorage.app",
+        messagingSenderId: "352994860732",
+        appId: "1:352994860732:web:8cc324198308f2e8d93ab9",
+        measurementId: "G-VHTKSQQSVG"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    let userUID;
+
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            userUID = user.uid;
+            fetchDataAndRenderChart();
+        } else {
+            alert("Please log in to view the chart.");
+            window.location.href = 'login.html';
+        }
+    });
+
+    async function fetchDataAndRenderChart() {
+        try {
+            const [incomeTotal, expenseTotal] = await Promise.all([getTotalIncome(), getTotalExpenses()]);
+            renderChart(incomeTotal, expenseTotal);
+        } catch (error) {
+            console.error("Error fetching data: ", error);
+        }
+    }
+
+    function getTotalIncome() {
+        return db.ref(`users/${userUID}/incomes`).once('value').then(snapshot => {
+            let totalIncome = 0;
+            snapshot.forEach(childSnapshot => {
+                const income = childSnapshot.val();
+                totalIncome += parseFloat(income.amount) || 0;
+            });
+            return totalIncome;
+        });
+    }
+
+    function getTotalExpenses() {
+        return db.ref(`users/${userUID}/expenses`).once('value').then(snapshot => {
+            let totalExpenses = 0;
+            snapshot.forEach(childSnapshot => {
+                const expense = childSnapshot.val();
+                totalExpenses += parseFloat(expense.amount) || 0;
+            });
+            return totalExpenses;
+        });
+    }
+
+    function renderChart(income, expenses) {
+        const ctx = document.getElementById('incomeExpenseChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Income', 'Expenses'],
+                datasets: [{
+                    label: 'Amount ($)',
+                    data: [income, expenses],
+                    backgroundColor: ['#4CAF50', '#FF5733']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Income vs Expense'
+                    }
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>
