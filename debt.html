@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Debt Management</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Debt Management</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
             display: flex;
-            flex-direction: column;
-            align-items: center;
+                        flex-direction: column;
+        align-items: center;
             min-height: 100vh;
             background-color: #f0f0f0;
         }
@@ -64,10 +64,31 @@
         th {
             background-color: #f4f4f4;
         }
+        .home-btn {
+    font-size: 14px; /* Slightly larger text size for visibility */
+    width: 5cm; /* Set width to 5cm */
+    height: 1.5cm; /* Adjust height for balance */
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+        }
+        .home-btn:hover {
+            background-color: #4ad219;
+        }
     </style>
 </head>
 <body>
-
+ <button class="home-btn" onclick="window.location.href='homepage.html'">Home</button>
     <!-- Debt Management Interface -->
     <div class="container">
         <h1>Debt Management</h1>
