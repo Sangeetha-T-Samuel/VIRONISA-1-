@@ -52,11 +52,31 @@
             padding: 20px;
             color: #666;
         }
+        .home-btn {
+    font-size: 14px; /* Slightly larger text size for visibility */
+    width: 5cm; /* Set width to 5cm */
+    height: 1.5cm; /* Adjust height for balance */
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+.home-btn:hover {
+            background-color: #4ad219;
+        }
     </style>
 </head>
 <body>
     <h1>Expense Log</h1>
-
+<button class="home-btn" onclick="window.location.href='homepage.html'">Home</button>
     <div class="table-container">
         <table id="expenseTable">
             <thead>
