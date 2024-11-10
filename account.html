@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #4CAF50;
+            padding: 10px 15px;
+            width: 100%;
+            position: absolute;
+            top: 0;
+        }
+        .navbar ul {
+            list-style-type: none;
+            display: flex;
+            margin: 0;
+        }
+        .navbar ul li {
+            margin-right: 20px;
+        }
+        .navbar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+        }
+        .navbar ul li a.active {
+            background-color: #99cfcf;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        .logout-btn {
+            width: 80px;
+            height: 30px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: auto;
+            padding: 3px;
+            box-sizing: border-box;
+        }
+        .logout-btn:hover {
+            background-color: darkred;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            margin-top: 80px;
+            display: flex;
+            justify-content: space-between;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+        button {
+            width: 48%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button.delete {
+            background-color: #f44336;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .link a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        .link a:hover {
+            text-decoration: underline;
+        }
+        .account-log {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+            margin-left: 5cm; /* Adjusted to move account log 5cm to the right */
+            flex: 1;
+        }
+        .account-log p {
+            margin: 0;
+            padding: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <ul>
+            <li><a href="homepage.html">Home</a></li>
+            <li><a href="account.html" class="active">Accounts</a></li>
+            <li><a href="income.html">Incomes</a></li>
+            <li><a href="expenses.html">Expenses</a></li>
+            <li><a href="budget.html">Budget</a></li>
+        </ul>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </nav>
+
+    <div class="container">
+        <div>
+            <h1>Create Account</h1>
+            <form id="accountForm">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+                <div class="buttons">
+                    <button type="button" onclick="createAccount()">Create Account</button>
+                    <button type="button" class="delete" onclick="deleteAccount()">Delete Account</button>
+                </div>
+            </form>
+            <div class="link">
+                <p>Already have an account? <a href="login.html">Back to Login</a></p>
+            </div>
+        </div>
+
+        <div class="account-log" id="accountLog">
+            <h2>Account Log</h2>
+            <!-- Account entries will be displayed here -->
+        </div>
+    </div>
+
+    <!-- Firebase Configuration using CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
+
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyC6OguzJC5Zr5iuN_Ii0MckURFTuobahTo",
+            authDomain: "vironisa-4beb8.firebaseapp.com",
+            databaseURL: "https://vironisa-4beb8-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "vironisa-4beb8",
+            storageBucket: "vironisa-4beb8.firebasestorage.app",
+            messagingSenderId: "352994860732",
+            appId: "1:352994860732:web:8cc324198308f2e8d93ab9",
+            measurementId: "G-VHTKSQQSVG"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // Check if user is signed in
+        auth.onAuthStateChanged(user => {
+            if (!user) {
+                window.location.href = "login.html"; // Redirect to login if not signed in
+            } else {
+                loadAccounts(user.uid); // Load accounts for the signed-in user
+            }
+        });
+
+        // Create Account Function
+        function createAccount() {
+            const user = auth.currentUser;
+            if (user) {
+                const name = document.getElementById('name').value;
+                const password = document.getElementById('password').value;
+
+                if (name && password) {
+                    const accountRef = db.ref('accounts/' + user.uid).push();
+                    accountRef.set({
+                        name: name,
+                        password: password
+                    }).then(() => {
+                        // Directly display the new account in the account log without reloading the entire log
+                        displayAccount(name); // Add to the account log on the page
+                        document.getElementById('accountForm').reset(); // Clear form
+                    }).catch(error => {
+                        alert("Error creating account: " + error.message);
+                    });
+                } else {
+                    alert("Please enter both name and password to create an account.");
+                }
+            }
+        }
+
+        // Load Accounts for Signed-in User
+        function loadAccounts(uid) {
+            const accountLog = document.getElementById('accountLog');
+            accountLog.innerHTML = "<h2>Account Log</h2>"; // Clear existing entries
+
+            const accountsRef = db.ref('accounts/' + uid);
+            accountsRef.once('value', snapshot => {
+                snapshot.forEach(childSnapshot => {
+                    const account = childSnapshot.val();
+                    displayAccount(account.name);
+                });
+            });
+        }
+
+        // Display Account in Log
+        function displayAccount(name) {
+            const accountEntry = document.createElement('p');
+            accountEntry.textContent = `Account: ${name}`;
+            document.getElementById('accountLog').appendChild(accountEntry);
+        }
+
+        // Delete Account Function
+        function deleteAccount() {
+            const user = auth.currentUser;
+            const name = document.getElementById('name').value;
+
+            if (user && name) {
+                const accountsRef = db.ref('accounts/' + user.uid);
+                accountsRef.once('value', snapshot => {
+                    snapshot.forEach(childSnapshot => {
+                        if (childSnapshot.val().name === name) {
+                            childSnapshot.ref.remove().then(() => {
+                                alert(`Account for ${name} has been deleted.`);
+                                loadAccounts(user.uid); // Refresh account log
+                                document.getElementById('accountForm').reset();
+                            });
+                        }
+                    });
+                });
+            } else {
+                alert("Please enter the name to delete an account.");
+            }
+        }
+
+        // Logout Function
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = "login.html";
+            }).catch(error => {
+                console.error("Error logging out:", error);
+            });
+        }
+    </script>
+
+</body>
+</html>

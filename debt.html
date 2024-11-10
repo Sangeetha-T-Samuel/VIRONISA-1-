@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debt Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            margin: 20px;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        input[type="date"], input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Debt Management Interface -->
+    <div class="container">
+        <h1>Debt Management</h1>
+        <form id="debtForm">
+            <label for="debtType">Debt Type</label>
+            <input type="text" id="debtType" name="debtType" placeholder="e.g., Credit Card, Loan" required>
+
+            <label for="debtAmount">Amount Owed</label>
+            <input type="number" id="debtAmount" name="debtAmount" min="0" required>
+
+            <label for="debtDueDate">Due Date</label>
+            <input type="date" id="debtDueDate" name="debtDueDate" required>
+
+            <button type="button" onclick="addDebt()">Add Debt</button>
+        </form>
+
+        <h2>Debt Log</h2>
+        <table id="debtTable">
+            <thead>
+                <tr>
+                    <th>Debt Type</th>
+                    <th>Amount</th>
+                    <th>Due Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Debt entries will be added here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-auth.js";
+        import { getDatabase, ref, set, push, get } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC6OguzJC5Zr5iuN_Ii0MckURFTuobahTo",
+            authDomain: "vironisa-4beb8.firebaseapp.com",
+            databaseURL: "https://vironisa-4beb8-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "vironisa-4beb8",
+            storageBucket: "vironisa-4beb8.firebasestorage.app",
+            messagingSenderId: "352994860732",
+            appId: "1:352994860732:web:8cc324198308f2e8d93ab9",
+            measurementId: "G-VHTKSQQSVG"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        let userUID = null;
+
+        // Listen for authentication state changes
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userUID = user.uid;
+                loadDebts(); // Load debts when the user is logged in
+            } else {
+                alert("Please sign in to access this page.");
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Add debt to Firebase
+        function addDebt() {
+            const debtType = document.getElementById('debtType').value;
+            const debtAmount = document.getElementById('debtAmount').value;
+            const debtDueDate = document.getElementById('debtDueDate').value;
+
+            if (debtType && debtAmount && debtDueDate) {
+                const debtEntry = { debtType, debtAmount, debtDueDate };
+                saveDebtToFirebase(debtEntry);
+                alert(`Debt added:\nType: ${debtType}\nAmount: $${debtAmount}\nDue Date: ${debtDueDate}`);
+            } else {
+                alert("Please fill out all fields.");
+            }
+        }
+
+        // Save debt to Firebase under the authenticated user
+        function saveDebtToFirebase(debtEntry) {
+            const debtRef = ref(db, `users/${userUID}/debts`);
+            const newDebtRef = push(debtRef); // Generate a unique key for the debt
+            set(newDebtRef, debtEntry)
+                .then(() => {
+                    loadDebts(); // Reload debts after saving
+                })
+                .catch((error) => {
+                    console.error("Error saving debt:", error);
+                });
+        }
+
+        // Load debts from Firebase
+        function loadDebts() {
+            const tableBody = document.querySelector("#debtTable tbody");
+            tableBody.innerHTML = ""; // Clear previous entries
+
+            const debtsRef = ref(db, `users/${userUID}/debts`);
+            get(debtsRef)
+                .then((snapshot) => {
+                    if (snapshot.exists()) {
+                        snapshot.forEach((debtSnapshot) => {
+                            const debt = debtSnapshot.val();
+                            const row = `<tr>
+                                <td>${debt.debtType}</td>
+                                <td>$${debt.debtAmount}</td>
+                                <td>${debt.debtDueDate}</td>
+                            </tr>`;
+                            tableBody.innerHTML += row;
+                        });
+                    } else {
+                        tableBody.innerHTML = "<tr><td colspan='3'>No debts found</td></tr>";
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error loading debts:", error);
+                });
+        }
+        window.addDebt=addDebt;
+    </script>
+</body>
+</html>

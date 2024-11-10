@@ -1,0 +1,98 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0; /* Light background color */
+  margin: 0;
+}
+
+header {
+  background-color: #4CAF50; /* Header color */
+  padding: 15px;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+}
+
+.navbar li {
+  margin: 0 15px;
+}
+
+.navbar a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.navbar a.active {
+  text-decoration: underline;
+}
+
+.logout-btn {
+  background-color: #f44336; /* Logout button color */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  opacity: 0.8;
+}
+
+.main-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 50px 20px;
+}
+
+h1 {
+  color: #333; /* Main heading color */
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.nav-btn {
+  padding: 15px 30px; /* Increased padding for larger buttons */
+  margin: 10px;
+  background-color: #4CAF50; /* Button color */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 200px; /* Fixed width for uniform size */
+  font-size: 16px; /* Increased font size */
+}
+
+.nav-btn:hover {
+  background-color: #45a049; /* Darker shade on hover */
+}
+
+.link {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.link a {
+  color: #007BFF; /* Link color */
+  text-decoration: none;
+}
+
+.link a:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,72 @@
+body {
+  font-family: 'Arial', sans-serif; /* You can change to another font like 'Roboto' */
+  background-color: #f0f4f8; /* Light background color */
+  color: #333; /* Dark text color */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.container {
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.left-panel {
+  background-color: #004d7a; /* Dark blue */
+  color: white;
+  padding: 40px;
+  text-align: center;
+  width: 300px;
+}
+
+.right-panel {
+  padding: 40px;
+  width: 300px;
+  text-align: center;
+}
+
+h1, h2 {
+  font-size: 2.5em; /* Bigger font size for headings */
+  margin: 0;
+}
+
+label {
+  font-size: 1.2em; /* Bigger font size for labels */
+  margin-top: 10px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1em; /* Bigger font size for input fields */
+}
+
+.login-btn {
+  background-color: #007bff; /* Button color */
+  color: white;
+  border: none;
+  padding: 15px;
+  border-radius: 5px;
+  font-size: 1.2em; /* Bigger font size for button */
+  cursor: pointer;
+}
+
+.login-btn:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+.signup-link {
+  color: #007bff; /* Link color */
+}
+
+.signup-link:hover {
+  text-decoration: underline; /* Underline on hover */
+}

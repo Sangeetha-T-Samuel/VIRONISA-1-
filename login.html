@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Finance Management</title>
+    <link rel="stylesheet" href="login.css">
+    <style>
+        .login-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .login-btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <img src="logo.png" alt="Finance Management Logo" class="logo">
+            <h1>Finance Management</h1>
+        </div>
+        <div class="right-panel">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <label for="username">Username (Email)</label>
+                <input type="email" id="username" name="username" required>
+                
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+                
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+            <p>Don't have an account? <a href="signup.html" class="signup-link">Sign Up</a></p>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs - use compatibility mode for non-modular usage -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+
+    <!-- Firebase Initialization Script -->
+    <script>
+        // Firebase configuration object (replace with your Firebase config)
+        const firebaseConfig = {
+  apiKey: "AIzaSyC6OguzJC5Zr5iuN_Ii0MckURFTuobahTo",
+  authDomain: "vironisa-4beb8.firebaseapp.com",
+  databaseURL: "https://vironisa-4beb8-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "vironisa-4beb8",
+  storageBucket: "vironisa-4beb8.firebasestorage.app",
+  messagingSenderId: "352994860732",
+  appId: "1:352994860732:web:8cc324198308f2e8d93ab9",
+  measurementId: "G-VHTKSQQSVG"
+};
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+    </script>
+
+    <!-- Login Script (place at the end of body) -->
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
+
+            // Retrieve values from form fields
+            const email = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Sign in using Firebase Authentication
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    alert("Login successful!");
+                    window.location.href = "homepage.html"; // Redirect on success
+                })
+                .catch((error) => {
+                    alert("Error: " + error.message);
+                });
+        });
+    </script>
+</body>
+</html>

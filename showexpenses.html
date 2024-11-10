@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show Expense Log</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .table-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            margin-top: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        td {
+            color: #333;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Expense Log</h1>
+
+    <div class="table-container">
+        <table id="expenseTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Account</th>
+                    <th>Category</th> <!-- Changed from Source to Category -->
+                    <th>Expense</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Expense data will be inserted here -->
+            </tbody>
+        </table>
+        <div id="noData" class="no-data" style="display: none;">No expenses recorded.</div>
+    </div>
+
+    <!-- Firebase Configuration using CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC6OguzJC5Zr5iuN_Ii0MckURFTuobahTo",
+            authDomain: "vironisa-4beb8.firebaseapp.com",
+            databaseURL: "https://vironisa-4beb8-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "vironisa-4beb8",
+            storageBucket: "vironisa-4beb8.firebasestorage.app",
+            messagingSenderId: "352994860732",
+            appId: "1:352994860732:web:8cc324198308f2e8d93ab9",
+            measurementId: "G-VHTKSQQSVG"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // Fetch expenses for the current user and display them in a table
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                const expensesRef = db.ref('expenses/' + user.uid); // Reference to user's expenses
+
+                expensesRef.once('value')
+                    .then(snapshot => {
+                        const tbody = document.getElementById('expenseTable').getElementsByTagName('tbody')[0];
+                        tbody.innerHTML = '';  // Clear previous entries
+                        let hasData = false;
+
+                        snapshot.forEach(expenseSnapshot => {
+                            const expenseData = expenseSnapshot.val();
+                            console.log(expenseData);  // Debug log to check structure of data
+                            const row = document.createElement('tr');
+
+                            // Create cells for Date, Account, Category (replacing Source), and Expense
+                            const dateCell = document.createElement('td');
+                            dateCell.textContent = expenseData.date || '';
+                            row.appendChild(dateCell);
+
+                            const accountCell = document.createElement('td');
+                            accountCell.textContent = expenseData.account || '';
+                            row.appendChild(accountCell);
+
+                            const categoryCell = document.createElement('td'); // Category instead of Source
+                            categoryCell.textContent = expenseData.category || 'N/A';  // Default to 'N/A' if category is missing
+                            row.appendChild(categoryCell);
+
+                            const amountCell = document.createElement('td');
+                            amountCell.textContent = expenseData.amount ? parseFloat(expenseData.amount).toFixed(2) : '';
+                            row.appendChild(amountCell);
+
+                            tbody.appendChild(row);
+                            hasData = true;
+                        });
+
+                        // Display "No expenses recorded" if no data
+                        document.getElementById('noData').style.display = hasData ? 'none' : 'block';
+                    })
+                    .catch(error => console.error("Error fetching expenses:", error));
+            }
+        });
+    </script>
+</body>
+</html>

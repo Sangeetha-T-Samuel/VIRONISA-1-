@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Reminders</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            margin: 20px;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        input[type="date"], input[type="number"], input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .home-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .home-btn:hover {
+            background-color: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <button class="home-btn" onclick="window.location.href='homepage.html'">Home</button>
+
+    <div class="container">
+        <h1>Bill Reminders</h1>
+        <form id="billForm">
+            <label for="accountSelect">Select Account</label>
+            <select id="accountSelect" name="accountSelect" required>
+                <option value="">Loading accounts...</option>
+            </select>
+
+            <label for="billName">Bill Name</label>
+            <input type="text" id="billName" name="billName" placeholder="e.g., Electricity, Internet" required>
+
+            <label for="billAmount">Amount Due</label>
+            <input type="number" id="billAmount" name="billAmount" min="0" required>
+
+            <label for="billDueDate">Due Date</label>
+            <input type="date" id="billDueDate" name="billDueDate" required>
+
+            <button type="button" onclick="addBill()">Add Bill</button>
+        </form>
+
+        <h2>All Bill Reminders</h2>
+        <table id="billTable">
+            <thead>
+                <tr>
+                    <th>Account</th>
+                    <th>Bill Name</th>
+                    <th>Amount</th>
+                    <th>Due Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Bill entries will be added here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-auth.js";
+        import { getDatabase, ref, get, push, set } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC6OguzJC5Zr5iuN_Ii0MckURFTuobahTo",
+            authDomain: "vironisa-4beb8.firebaseapp.com",
+            databaseURL: "https://vironisa-4beb8-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "vironisa-4beb8",
+            storageBucket: "vironisa-4beb8.firebasestorage.app",
+            messagingSenderId: "352994860732",
+            appId: "1:352994860732:web:8cc324198308f2e8d93ab9",
+            measurementId: "G-VHTKSQQSVG"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        let userUID = null;
+
+        // Authenticate user and load accounts
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userUID = user.uid;
+                loadAccounts();
+                loadBills(); // Load bills on page load
+            } else {
+                alert("Please sign in to access this page.");
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Load accounts for the signed-in user
+        function loadAccounts() {
+            const accountsRef = ref(db, `accounts/${userUID}`);
+            const accountSelect = document.getElementById('accountSelect');
+            accountSelect.innerHTML = '<option value="" disabled selected>--select--</option>';
+
+            get(accountsRef)
+                .then(snapshot => {
+                    if (snapshot.exists()) {
+                        snapshot.forEach(accountSnapshot => {
+                            const account = accountSnapshot.val();
+                            if (account && account.name) {
+                                const option = document.createElement('option');
+                                option.value = accountSnapshot.key;
+                                option.textContent = account.name;
+                                accountSelect.appendChild(option);
+                            }
+                        });
+                    } else {
+                        accountSelect.innerHTML = "<option value='' disabled>No accounts available</option>";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error loading accounts:", error);
+                    alert("Error loading accounts. Please check your database connection.");
+                });
+        }
+
+        // Load bills for the signed-in user
+        function loadBills() {
+            const tableBody = document.querySelector("#billTable tbody");
+            tableBody.innerHTML = ""; // Clear previous entries
+
+            const userBillsRef = ref(db, `users/${userUID}/bills`);
+            get(userBillsRef).then(snapshot => {
+                if (snapshot.exists()) {
+                    snapshot.forEach(billSnapshot => {
+                        const bill = billSnapshot.val();
+                        const accountID = bill.accountID; // Get the accountID for the bill
+                        getAccountName(accountID).then(accountName => {
+                            const row = `<tr>
+                                <td>${accountName}</td>
+                                <td>${bill.billName}</td>
+                                <td>$${bill.billAmount}</td>
+                                <td>${bill.billDueDate}</td>
+                            </tr>`;
+                            tableBody.innerHTML += row;
+                        }).catch(error => {
+                            console.error("Error fetching account name:", error);
+                        });
+                    });
+                } else {
+                    tableBody.innerHTML = "<tr><td colspan='4'>No bills found</td></tr>";
+                }
+            }).catch(error => {
+                console.error("Error loading bills:", error);
+            });
+        }
+
+        // Get account name from accountID
+        function getAccountName(accountID) {
+            const accountsRef = ref(db, `accounts/${userUID}/${accountID}`);
+            return get(accountsRef).then(snapshot => {
+                return snapshot.exists() ? snapshot.val().name : "Unknown Account";
+            });
+        }
+
+        // Add new bill and save to Firebase
+        function addBill() {
+            const account = document.getElementById('accountSelect').value;
+            const billName = document.getElementById('billName').value;
+            const billAmount = document.getElementById('billAmount').value;
+            const billDueDate = document.getElementById('billDueDate').value;
+
+            if (account && billName && billAmount && billDueDate) {
+                const billEntry = { billName, billAmount, billDueDate, accountID: account }; // Save the accountID as part of the bill
+                saveBillToFirebase(account, billEntry);
+                loadBills(); // Reload the bills
+                alert(`Bill added:\nAccount: ${account}\nName: ${billName}\nAmount: $${billAmount}\nDue Date: ${billDueDate}`);
+            } else {
+                alert("Please fill out all fields.");
+            }
+        }
+
+        // Save bill to Firebase under the authenticated user and selected account
+        function saveBillToFirebase(account, billEntry) {
+            const billRef = ref(db, `users/${userUID}/bills`);
+            const newBillRef = push(billRef); // Generate unique key for new bill
+            set(newBillRef, billEntry);
+        }
+
+        window.addBill = addBill;
+    </script>
+</body>
+</html>
