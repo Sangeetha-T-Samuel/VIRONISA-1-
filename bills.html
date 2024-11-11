@@ -65,22 +65,21 @@
             background-color: #f4f4f4;
         }
         .home-btn {
-    font-size: 14px; /* Slightly larger text size for visibility */
-    width: 5cm; /* Set width to 5cm */
-    height: 1.5cm; /* Adjust height for balance */
-    border: none;
-    border-radius: 5px;
-    background-color: #4CAF50;
-    color: white;
-    cursor: pointer;
-    position: absolute;
-    right: 15px;
-    top: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
+            font-size: 14px; /* Slightly larger text size for visibility */
+            width: 5cm; /* Set width to 5cm */
+            height: 1.5cm; /* Adjust height for balance */
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
         }
         .home-btn:hover {
             background-color: #4ad219;
@@ -162,7 +161,8 @@
 
         // Load accounts for the signed-in user
         function loadAccounts() {
-            const accountsRef = ref(db, `accounts/${userUID}`);
+            const accountsRef = ref(db, `users/${userUID}/accounts`);
+
             const accountSelect = document.getElementById('accountSelect');
             accountSelect.innerHTML = '<option value="" disabled selected>--select--</option>';
 
@@ -173,8 +173,8 @@
                             const account = accountSnapshot.val();
                             if (account && account.name) {
                                 const option = document.createElement('option');
-                                option.value = accountSnapshot.key;
-                                option.textContent = account.name;
+                                option.value = accountSnapshot.key;  // Use account key to identify the account
+                                option.textContent = account.name;    // Use account name for display
                                 accountSelect.appendChild(option);
                             }
                         });
@@ -221,7 +221,7 @@
 
         // Get account name from accountID
         function getAccountName(accountID) {
-            const accountsRef = ref(db, `accounts/${userUID}/${accountID}`);
+            const accountsRef = ref(db, `users/${userUID}/accounts/${accountID}`);
             return get(accountsRef).then(snapshot => {
                 return snapshot.exists() ? snapshot.val().name : "Unknown Account";
             });
