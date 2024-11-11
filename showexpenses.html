@@ -119,7 +119,8 @@
         // Fetch expenses for the current user and display them in a table
         auth.onAuthStateChanged(user => {
             if (user) {
-                const expensesRef = db.ref('expenses/' + user.uid); // Reference to user's expenses
+                
+                const expensesRef = db.ref('users/' + user.uid + '/expenses'); // Reference to user's expenses under the correct path
 
                 expensesRef.once('value')
                     .then(snapshot => {
