@@ -119,43 +119,44 @@
         const auth = firebase.auth();
 
         // Function to load income data from Firebase and display in table
-        function loadIncomeData(user) {
-            if (!user) {
-                alert("You must be logged in to view income data.");
-                window.location.href = 'login.html'; // Redirect to login if not authenticated
-                return;
-            }
+       // Function to load income data from Firebase and display in table
+function loadIncomeData(user) {
+    if (!user) {
+        alert("You must be logged in to view income data.");
+        window.location.href = 'login.html'; // Redirect to login if not authenticated
+        return;
+    }
 
-            // Changed from 'incomes' to 'income'
-            const incomeRef = db.ref(`income/${user.uid}`); // Reference to user's income
-            incomeRef.on("value", (snapshot) => {
-                const incomeData = snapshot.val();
-                const incomeTable = document.getElementById("incomeTable");
-                incomeTable.innerHTML = "";  // Clear table before adding rows
+    // Corrected: Use 'incomesRef' instead of 'incomeRef'
+    const incomesRef = db.ref('users/' + user.uid + '/incomes'); // Reference to user's incomes under the correct path
 
-                if (incomeData) {
-                    Object.keys(incomeData).forEach((key) => {
-                        const income = incomeData[key];
-                        const row = document.createElement("tr");
+    incomesRef.on("value", (snapshot) => {
+        const incomeData = snapshot.val();
+        const incomeTable = document.getElementById("incomeTable");
+        incomeTable.innerHTML = "";  // Clear table before adding rows
 
-                        // Populate row with data
-                        row.innerHTML = `
-                            <td>${income.date}</td>
-                            <td>${income.account}</td>
-                            <td>${income.source}</td>
-                            <td>${income.amount}</td>
-                        `;
+        if (incomeData) {
+            Object.keys(incomeData).forEach((key) => {
+                const income = incomeData[key];
+                const row = document.createElement("tr");
 
-                        incomeTable.appendChild(row);
-                    });
-                } else {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `<td colspan="4" style="text-align:center;">No income data found.</td>`;
-                    incomeTable.appendChild(row);
-                }
+                // Populate row with data
+                row.innerHTML = `
+                    <td>${income.date}</td>
+                    <td>${income.account}</td>
+                    <td>${income.source}</td>
+                    <td>${income.amount}</td>
+                `;
+
+                incomeTable.appendChild(row);
             });
+        } else {
+            const row = document.createElement("tr");
+            row.innerHTML = `<td colspan="4" style="text-align:center;">No income data found.</td>`;
+            incomeTable.appendChild(row);
         }
-
+    });
+}
         // Add a listener for authentication state changes
         auth.onAuthStateChanged(function(user) {
             if (user) {
